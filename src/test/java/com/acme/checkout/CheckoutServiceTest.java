@@ -8,7 +8,7 @@ import com.acme.payments.PaymentService;
 import com.acme.payments.Receipt;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class CheckoutServiceTest {
 
@@ -21,5 +21,15 @@ class CheckoutServiceTest {
         Receipt receipt = checkout.checkout(order);
 
         assertEquals("ord-2", receipt.orderId());
+    }
+
+    @Test
+    void cartValidationAndDiscounts() {
+        CheckoutService checkout = new CheckoutService(new PaymentService(new FakeGateway()));
+        Order order = new Order("ord-cart", new Account("acct-cart", Currency.USD), 10000);
+
+        assertTrue(checkout.validateCart(order));
+        assertEquals(9000, checkout.applyPromotions(order, "DISCOUNT10"));
+        assertEquals(10000, checkout.applyPromotions(order, "INVALID"));
     }
 }
